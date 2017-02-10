@@ -2,7 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/Inventory-ADBNP7.iml" filepath="$PROJECT_DIR$/Inventory-ADBNP7.iml" />
       <module fileurl="file://$PROJECT_DIR$/ProductsInventory.iml" filepath="$PROJECT_DIR$/ProductsInventory.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>
