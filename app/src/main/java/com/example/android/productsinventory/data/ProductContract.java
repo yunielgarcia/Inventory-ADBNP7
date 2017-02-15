@@ -14,7 +14,7 @@ public class ProductContract {
     /* Inner class that defines the table contents */
     public static class ProductEntry implements BaseColumns {
 
-        public static final String TABLE_NAME = "product";
+        public static final String TABLE_NAME = "products";
 
         public final static String _ID = BaseColumns._ID;
         public static final String COLUMN_NAME_NAME = "name";

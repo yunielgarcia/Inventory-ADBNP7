@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Products Inventory</string>
+    <string name="product_name">Name</string>
+    <string name="hint_product_name">product name</string>
+    <string name="price_label">Price</string>
+    <string name="hint_product_price">$</string>
+
 </resources>
