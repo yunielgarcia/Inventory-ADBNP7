@@ -11,7 +11,8 @@
      limitations under the License.
 -->
 <!-- Layout for the editor -->
-<LinearLayout
+<RelativeLayout
+
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -22,6 +23,8 @@
 
     <!-- Overview category -->
     <LinearLayout
+        android:id="@+id/prod_name_row"
+        android:layout_alignParentTop="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
@@ -53,6 +56,7 @@
 
     <!-- Price field -->
     <LinearLayout
+        android:layout_below="@+id/prod_name_row"
         android:id="@+id/container_measurement"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -81,6 +85,33 @@
                 android:id="@+id/label_weight_units"
                 android:text="@string/hint_product_price"
                 style="@style/EditorUnitsStyle"/>
+
         </RelativeLayout>
     </LinearLayout>
-</LinearLayout>
+
+    <Button
+        android:layout_below="@+id/container_measurement"
+        android:id="@+id/buttonLoadPicture"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="@string/btn_add_pict" >
+    </Button>
+
+    <ImageView
+        android:layout_below="@+id/buttonLoadPicture"
+        android:padding="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/imageView" />
+
+    <Button
+        android:layout_alignParentBottom="true"
+        android:id="@+id/add_product_btn"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="@string/save_product" >
+    </Button>
+
+</RelativeLayout>

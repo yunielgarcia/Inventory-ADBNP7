@@ -25,7 +25,7 @@ public class ProductDbHelper extends SQLiteOpenHelper{
             "CREATE TABLE " + ProductContract.ProductEntry.TABLE_NAME + " (" +
                     ProductContract.ProductEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
                     ProductContract.ProductEntry.COLUMN_NAME_NAME + " TEXT NOT NULL," +
-                    ProductContract.ProductEntry.COLUMN_NAME_PHOTO + " BLOB NOT NULL," +
+                    ProductContract.ProductEntry.COLUMN_NAME_PHOTO + " BLOB," +
                     ProductContract.ProductEntry.COLUMN_NAME_PRICE + " REAL NOT NULL)";
 
     private static final String SQL_DELETE_ENTRIES =

@@ -4,5 +4,6 @@
     <string name="hint_product_name">product name</string>
     <string name="price_label">Price</string>
     <string name="hint_product_price">$</string>
-
+    <string name="btn_add_pict">add product image</string>
+    <string name="save_product">save product</string>
 </resources>
