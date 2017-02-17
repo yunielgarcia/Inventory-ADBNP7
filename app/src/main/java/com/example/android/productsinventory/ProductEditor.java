@@ -16,6 +16,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.example.android.productsinventory.data.ProductContract;
@@ -28,7 +29,8 @@ import static com.example.android.productsinventory.R.id.fab;
 public class ProductEditor extends AppCompatActivity {
 
     private static int PICK_IMAGE_REQUEST = 1;
-    private ProductDbHelper mDbHelper;
+
+    //private ProductDbHelper mDbHelper;
     private EditText mNameEditText;
     private EditText mPriceEditText;
 
@@ -38,7 +40,8 @@ public class ProductEditor extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_product_editor);
 
-        mDbHelper = new ProductDbHelper(this);
+        //mDbHelper = new ProductDbHelper(this);
+
 
         // Find all relevant views that we will need to read user input from
         mNameEditText = (EditText) findViewById(R.id.produc_name);
@@ -72,7 +75,7 @@ public class ProductEditor extends AppCompatActivity {
 
     private void saveProduct(){
         // Gets the data repository in write mode
-        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+        //SQLiteDatabase db = mDbHelper.getWritableDatabase();
 
         //name
         String name = mNameEditText.getText().toString().trim();
@@ -84,9 +87,12 @@ public class ProductEditor extends AppCompatActivity {
         values.put(ProductContract.ProductEntry.COLUMN_NAME_NAME, name);
         values.put(ProductContract.ProductEntry.COLUMN_NAME_PRICE, price);
 
-        // Insert the new row, returning the primary key value of the new row
-        Long newRowId = db.insert(ProductContract.ProductEntry.TABLE_NAME, null, values);
-        Log.i("ROWS_INNSERTED", newRowId.toString());
+//        // Insert the new row, returning the primary key value of the new row
+//        Long newRowId = db.insert(ProductContract.ProductEntry.TABLE_NAME, null, values);
+
+        Uri newUri = getContentResolver().insert(ProductContract.ProductEntry.CONTENT_URI, values);
+
+        //Log.i("ROWS_INNSERTED", newUri.toString());
     }
 
     @Override
