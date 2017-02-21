@@ -46,6 +46,10 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         mCursorAdapter = new ProductCursorAdapter(this, null);
         prodListView.setAdapter(mCursorAdapter);
 
+        // Find and set empty view on the ListView, so that it only shows when the list has 0 items.
+        View emptyView = findViewById(R.id.empty_view);
+        prodListView.setEmptyView(emptyView);
+
         // Setup FAB to open EditorActivity
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -59,9 +63,17 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         prodListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+                //from the content URI that represents the specific product thath was clicked on,
+                //by appending the "id" (passed as input to this method )
+                //for example, the URI would be "content://com.example.android.products/products/2"
+                //if the product with ID 2 was clicked on.
                 Uri itemUri = ContentUris.withAppendedId(ProductContract.ProductEntry.CONTENT_URI, id);
+                //Create new intent to go to {@link EditorActivity}
                 Intent editorIntent = new Intent(MainActivity.this, ProductEditor.class);
-
+                //Set the URI on the data field of the intent
+                editorIntent.setData(itemUri);
+                //Launch the activity to display the data for the current product
+                startActivity(editorIntent);
             }
         });
 

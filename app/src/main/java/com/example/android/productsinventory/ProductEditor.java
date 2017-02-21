@@ -1,7 +1,10 @@
 package com.example.android.productsinventory;
 
+import android.app.LoaderManager;
 import android.content.ContentValues;
+import android.content.CursorLoader;
 import android.content.Intent;
+import android.content.Loader;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
@@ -24,11 +27,18 @@ import com.example.android.productsinventory.data.ProductDbHelper;
 
 import java.io.IOException;
 
+import static com.example.android.productsinventory.MainActivity.PROJECTION;
 import static com.example.android.productsinventory.R.id.fab;
 
-public class ProductEditor extends AppCompatActivity {
+public class ProductEditor extends AppCompatActivity  implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static int PICK_IMAGE_REQUEST = 1;
+    private static final int EXISTING_PRODUCT_LOADER = 1;
+    private static final String[] PROJECTION = {
+            ProductContract.ProductEntry._ID,
+            ProductContract.ProductEntry.COLUMN_NAME_NAME,
+            ProductContract.ProductEntry.COLUMN_NAME_PRICE,
+    };
 
     //private ProductDbHelper mDbHelper;
     private EditText mNameEditText;
@@ -42,11 +52,15 @@ public class ProductEditor extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_product_editor);
 
+        //Examine the intent that was used to lauch this activity,
+        // in order to figure out if we're creating a new product or editing an existing one.
         itemUri = getIntent().getData();
+        //check for item uri to see which mode "add pet/edit pet"
+        changeTitle();
 
 
         // Find all relevant views that we will need to read user input from
-        mNameEditText = (EditText) findViewById(R.id.produc_name);
+        mNameEditText = (EditText) findViewById(R.id.product_name);
         mPriceEditText = (EditText) findViewById(R.id.edit_product_price);
 
         //Load the picture onClick
@@ -75,7 +89,20 @@ public class ProductEditor extends AppCompatActivity {
         });
     }
 
-    private void saveProduct(){
+    private void changeTitle() {
+        if (itemUri == null) {
+            setTitle(R.string.editor_activity_title_new_product);
+        } else {
+            setTitle(R.string.editor_activity_title_edit_product);
+            /*The difference from when we last used a CursorLoader is that instead of taking the
+             cursor and putting it into a CursorAdapter, we’ll take all of the items from the cursor
+             and use them to populate the EditTextFields. We will use almost the same steps as before,
+             except that when we make the loader, the uri will be for one pet, and not all of the pets.*/
+            getLoaderManager().initLoader(EXISTING_PRODUCT_LOADER, null, this);
+        }
+    }
+
+    private void saveProduct() {
         // Gets the data repository in write mode
         //SQLiteDatabase db = mDbHelper.getWritableDatabase();
 
@@ -115,5 +142,36 @@ public class ProductEditor extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+        // Now create and return a CursorLoader that will take care of
+        // creating a Cursor for the data being displayed.
+        return new CursorLoader(this, itemUri,
+                PROJECTION, null, null, null);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        // Bail early if the cursor is null or there is less than 1 row in the cursor
+        if (cursor == null || cursor.getCount() < 1) {
+            return;
+        }
+
+        int nameIdx = cursor.getColumnIndex(ProductContract.ProductEntry.COLUMN_NAME_NAME);
+        int priceIdx = cursor.getColumnIndex(ProductContract.ProductEntry.COLUMN_NAME_PRICE);
+
+        if (cursor.moveToFirst()) {
+           // mNameEditText.setText(cursor.getString(nameIdx));
+            mPriceEditText.setText(cursor.getInt(priceIdx));
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        // If the loader is invalidated, clear out all the data from the input fields.
+        mNameEditText.setText("");
+        mPriceEditText.setText(0);
     }
 }

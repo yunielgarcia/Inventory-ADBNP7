@@ -44,7 +44,7 @@
 
             <!-- Name field -->
             <EditText
-                android:id="@+id/produc_name"
+                android:id="@+id/product_name"
                 android:hint="@string/hint_product_name"
                 android:inputType="textCapWords"
                 style="@style/EditorFieldStyle" />

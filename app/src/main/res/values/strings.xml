@@ -6,4 +6,10 @@
     <string name="hint_product_price">$</string>
     <string name="btn_add_pict">add product image</string>
     <string name="save_product">save product</string>
+    <!-- Title text for the empty view -->
+    <string name="empty_view_title_text">Product list es empty</string>
+    <!-- Subtitle text for the empty view that prompts the user to add a product -->
+    <string name="empty_view_subtitle_text">Get started by adding a product</string>
+    <string name="editor_activity_title_new_product">Add product</string>
+    <string name="editor_activity_title_edit_product">Edit product</string>
 </resources>
