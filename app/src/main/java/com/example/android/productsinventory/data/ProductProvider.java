@@ -16,18 +16,24 @@ import static android.os.Build.PRODUCT;
  * Created by ygarcia on 2/17/2017.
  */
 
-public class ProductProvider extends ContentProvider{
+public class ProductProvider extends ContentProvider {
 
-    /** Tag for the log messages */
+    /**
+     * Tag for the log messages
+     */
     public static final String LOG_TAG = ProductProvider.class.getSimpleName();
 
     //make it globla so all method have access to the productmdhelper instance
     ProductDbHelper mDbHelper;
 
-    /** URI matcher code for the content URI for the products table */
+    /**
+     * URI matcher code for the content URI for the products table
+     */
     private static final int PRODUCTS = 100;
 
-    /** URI matcher code for the content URI for a single products in the pets table */
+    /**
+     * URI matcher code for the content URI for a single products in the pets table
+     */
     private static final int PRODUCT_ID = 101;
 
     /**
@@ -83,7 +89,7 @@ public class ProductProvider extends ContentProvider{
                 // arguments that will fill in the "?". Since we have 1 question mark in the
                 // selection, we have 1 String in the selection arguments' String array.
                 selection = ProductContract.ProductEntry._ID + "=?";
-                selectionArgs = new String[] { String.valueOf(ContentUris.parseId(uri)) };
+                selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
 
                 // This will perform a query on the products table where the _id equals 3 to return a
                 // Cursor containing that row of the table.
@@ -108,7 +114,7 @@ public class ProductProvider extends ContentProvider{
         switch (match) {
             case PRODUCTS:
                 return ProductContract.ProductEntry.CONTENT_LIST_TYPE;
-            case PRODUCT_ID :
+            case PRODUCT_ID:
                 return ProductContract.ProductEntry.CONTENT_ITEM_TYPE;
             default:
                 throw new IllegalStateException("Unknown URI " + uri + " with match " + match);
@@ -127,7 +133,8 @@ public class ProductProvider extends ContentProvider{
                 throw new IllegalArgumentException("Insertion is not supported for " + uri);
         }
     }
-    private Uri insertProduct(Uri uri, ContentValues contentValues){
+
+    private Uri insertProduct(Uri uri, ContentValues contentValues) {
 
         String name = contentValues.getAsString(ProductContract.ProductEntry.COLUMN_NAME_NAME);
         if (name == null) {
@@ -149,6 +156,9 @@ public class ProductProvider extends ContentProvider{
             return null;
         }
 
+        //Notify all listeners that the data has changed for the products table
+        getContext().getContentResolver().notifyChange(uri, null);
+
         return ContentUris.withAppendedId(uri, id);
     }
 
@@ -157,20 +167,30 @@ public class ProductProvider extends ContentProvider{
         // Get writable database
         SQLiteDatabase database = mDbHelper.getWritableDatabase();
 
+        // Track the number of rows that were deleted
+        int rowsDeleted;
+
         final int match = sUriMatcher.match(uri);
         switch (match) {
             case PRODUCTS:
                 // Delete all rows that match the selection and selection args
-                return database.delete(ProductContract.ProductEntry.TABLE_NAME, selection, selectionArgs);
+                rowsDeleted = database.delete(ProductContract.ProductEntry.TABLE_NAME, selection, selectionArgs);
+                if (rowsDeleted != 0) {
+                    getContext().getContentResolver().notifyChange(uri, null);
+                }
+                return rowsDeleted;
+
             case PRODUCT_ID:
                 // Delete a single row given by the ID in the URI
                 selection = ProductContract.ProductEntry._ID + "=?";
                 selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
+                // Delete all rows that match the selection and selection args
+                rowsDeleted = database.delete(ProductContract.ProductEntry.TABLE_NAME, selection, selectionArgs);
+                if (rowsDeleted != 0) {
+                    getContext().getContentResolver().notifyChange(uri, null);
+                }
+                return rowsDeleted;
 
-                //Notify all listeners that the data has changed for the pet content URI
-                getContext().getContentResolver().notifyChange(uri, null);
-
-                return database.delete(ProductContract.ProductEntry.TABLE_NAME, selection, selectionArgs);
             default:
                 throw new IllegalArgumentException("Deletion is not supported for " + uri);
         }
@@ -187,7 +207,7 @@ public class ProductProvider extends ContentProvider{
                 // so we know which row to update. Selection will be "_id=?" and selection
                 // arguments will be a String array containing the actual ID.
                 selection = ProductContract.ProductEntry._ID + "=?";
-                selectionArgs = new String[] { String.valueOf(ContentUris.parseId(uri)) };
+                selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
                 return updateProduct(uri, contentValues, selection, selectionArgs);
             default:
                 throw new IllegalArgumentException("Update is not supported for " + uri);
@@ -201,7 +221,7 @@ public class ProductProvider extends ContentProvider{
             return 0;
         }
 
-        if (values.containsKey(ProductContract.ProductEntry.COLUMN_NAME_NAME)){
+        if (values.containsKey(ProductContract.ProductEntry.COLUMN_NAME_NAME)) {
             String name = values.getAsString(ProductContract.ProductEntry.COLUMN_NAME_NAME);
             if (name == null) {
                 throw new IllegalArgumentException("Pet requires a name");
@@ -220,10 +240,15 @@ public class ProductProvider extends ContentProvider{
         SQLiteDatabase database = mDbHelper.getWritableDatabase();
         // Returns the number of database rows affected by the update statement
 
-        //Notify all listeners that the data has changed for the pet content URI
-        getContext().getContentResolver().notifyChange(uri, null);
+        int rowsUpdated = database.update(ProductContract.ProductEntry.TABLE_NAME, values, selection, selectionArgs);
 
-        return database.update(ProductContract.ProductEntry.TABLE_NAME, values, selection, selectionArgs);
+        // If 1 or more rows were updated, then notify all listeners that the data at the
+        // given URI has changed
+        if (rowsUpdated != 0) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+
+        return rowsUpdated;
 
     }
 

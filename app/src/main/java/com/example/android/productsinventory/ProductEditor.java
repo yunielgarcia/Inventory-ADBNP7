@@ -34,13 +34,15 @@ public class ProductEditor extends AppCompatActivity {
     private EditText mNameEditText;
     private EditText mPriceEditText;
 
+    private Uri itemUri;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_product_editor);
 
-        //mDbHelper = new ProductDbHelper(this);
+        itemUri = getIntent().getData();
 
 
         // Find all relevant views that we will need to read user input from
