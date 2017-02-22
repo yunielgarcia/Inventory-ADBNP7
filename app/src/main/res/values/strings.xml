@@ -12,4 +12,8 @@
     <string name="empty_view_subtitle_text">Get started by adding a product</string>
     <string name="editor_activity_title_new_product">Add product</string>
     <string name="editor_activity_title_edit_product">Edit product</string>
+    <string name="editor_insert_prod_failed">product insertion failed</string>
+    <string name="editor_insert_prod_successful">product saved</string>
+    <string name="product_updated">product updated</string>
+    <string name="product_updated_failed">product update failed</string>
 </resources>
