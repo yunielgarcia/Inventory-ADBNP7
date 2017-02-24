@@ -1,10 +1,13 @@
 package com.example.android.productsinventory;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CursorAdapter;
 import android.widget.TextView;
 
@@ -16,7 +19,7 @@ import com.example.android.productsinventory.data.ProductContract;
 
 public class ProductCursorAdapter extends CursorAdapter{
 
-
+    private ContentResolver mContent;
     /**
      * Constructs a new {@link ProductCursorAdapter}.
      *
@@ -25,7 +28,9 @@ public class ProductCursorAdapter extends CursorAdapter{
      */
     public ProductCursorAdapter(Context context, Cursor c) {
         super(context, c, 0);
+        mContent = context.getContentResolver();
     }
+
 
     /**
      * Makes a new blank list item view. No data is set (or bound) to the views yet.
@@ -69,5 +74,15 @@ public class ProductCursorAdapter extends CursorAdapter{
         tvName.setText(name);
         tvPrice.setText(price.toString());
         tvQty.setText(qty.toString());
+
+        //setting onClick on buy button
+        Button buy_btn = (Button) view.findViewById(R.id.buy_btn);
+        buy_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.i("MainActivity", "buying one product");
+                // TODO: make the query here...
+            }
+        });
     }
 }
