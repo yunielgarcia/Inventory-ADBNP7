@@ -58,12 +58,16 @@ public class ProductCursorAdapter extends CursorAdapter{
         // Find fields to populate in inflated template
         TextView tvName = (TextView) view.findViewById(R.id.name);
         TextView tvPrice = (TextView) view.findViewById(R.id.price_li);
+        TextView tvQty = (TextView) view.findViewById(R.id.li_quantity);
 
         // Extract properties from cursor
         String name = cursor.getString(cursor.getColumnIndexOrThrow(ProductContract.ProductEntry.COLUMN_NAME_NAME));
         Integer price = cursor.getInt(cursor.getColumnIndexOrThrow(ProductContract.ProductEntry.COLUMN_NAME_PRICE));
+        Integer qty = cursor.getInt(cursor.getColumnIndexOrThrow(ProductContract.ProductEntry.COLUMN_NAME_QUANTITY));
+
         // Populate fields with extracted properties
         tvName.setText(name);
         tvPrice.setText(price.toString());
+        tvQty.setText(qty.toString());
     }
 }

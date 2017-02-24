@@ -29,7 +29,9 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     static final String[] PROJECTION = {
             ProductContract.ProductEntry._ID,
             ProductContract.ProductEntry.COLUMN_NAME_NAME,
-            ProductContract.ProductEntry.COLUMN_NAME_PRICE,};
+            ProductContract.ProductEntry.COLUMN_NAME_PRICE,
+            ProductContract.ProductEntry.COLUMN_NAME_QUANTITY
+    };
 
     // This is the Adapter being used to display the list's data
     ProductCursorAdapter mCursorAdapter;

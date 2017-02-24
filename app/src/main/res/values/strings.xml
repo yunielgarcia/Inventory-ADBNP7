@@ -16,4 +16,6 @@
     <string name="editor_insert_prod_successful">product saved</string>
     <string name="product_updated">product updated</string>
     <string name="product_updated_failed">product update failed</string>
+    <string name="li_price">price&#160;</string>
+    <string name="li_btn">buy</string>
 </resources>
