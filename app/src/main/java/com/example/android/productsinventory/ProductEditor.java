@@ -6,31 +6,23 @@ import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.MediaStore;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ListView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.android.productsinventory.data.ProductContract;
-import com.example.android.productsinventory.data.ProductDbHelper;
 
 import java.io.IOException;
-
-import static android.R.attr.data;
-import static com.example.android.productsinventory.MainActivity.PROJECTION;
-import static com.example.android.productsinventory.R.id.fab;
 
 public class ProductEditor extends AppCompatActivity  implements LoaderManager.LoaderCallbacks<Cursor> {
 
@@ -40,13 +32,17 @@ public class ProductEditor extends AppCompatActivity  implements LoaderManager.L
             ProductContract.ProductEntry._ID,
             ProductContract.ProductEntry.COLUMN_NAME_NAME,
             ProductContract.ProductEntry.COLUMN_NAME_PRICE,
+            ProductContract.ProductEntry.COLUMN_NAME_QUANTITY,
     };
 
-    //private ProductDbHelper mDbHelper;
     private EditText mNameEditText;
     private EditText mPriceEditText;
+    private EditText mQtyEditText;
 
     private Uri itemUri;
+
+    //New value to be added in case of edit shipment/sale
+    String new_amount_of_products = "0";
 
 
     @Override
@@ -64,6 +60,7 @@ public class ProductEditor extends AppCompatActivity  implements LoaderManager.L
         // Find all relevant views that we will need to read user input from
         mNameEditText = (EditText) findViewById(R.id.product_name);
         mPriceEditText = (EditText) findViewById(R.id.edit_product_price);
+        mQtyEditText = (EditText) findViewById(R.id.quantity_field);
 
         //Load the picture onClick
         Button load_img_btn = (Button) findViewById(R.id.buttonLoadPicture);
@@ -89,13 +86,62 @@ public class ProductEditor extends AppCompatActivity  implements LoaderManager.L
                 finish();
             }
         });
+
+        //Add shipment btn
+        final Button shipment_qty_btn = (Button) findViewById(R.id.shipment_qty_btn);
+        final LinearLayout add_shipment_edit = (LinearLayout) findViewById(R.id.add_shipment_edit);
+        final TextView shipment_cancel_btn = (TextView) findViewById(R.id.shipment_cancel);
+        final TextView shipment_ok_btn = (TextView) findViewById(R.id.shipment_ok);
+
+        shipment_qty_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                shipment_qty_btn.setVisibility(View.GONE);
+                add_shipment_edit.setVisibility(View.VISIBLE);
+            }
+        });
+        //Cancel addition
+        shipment_cancel_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                add_shipment_edit.setVisibility(View.GONE);
+                shipment_qty_btn.setVisibility(View.VISIBLE);
+            }
+        });
+        //Ok addition
+        shipment_ok_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                EditText shipment_amount_et = (EditText) findViewById(R.id.shipment_amount_et);
+                new_amount_of_products = shipment_amount_et.getText().toString().trim();
+            }
+        });
     }
 
     private void changeTitle() {
         if (itemUri == null) {
+            //hide 'Add shipment' btn
+            Button add_shipment_btn = (Button) findViewById(R.id.shipment_qty_btn);
+            add_shipment_btn.setVisibility(View.GONE);
+
             setTitle(R.string.editor_activity_title_new_product);
+
         } else {
+
             setTitle(R.string.editor_activity_title_edit_product);
+            //Disable each edit field
+            mNameEditText = (EditText) findViewById(R.id.product_name);
+            mNameEditText.setFocusable(false);
+            mNameEditText.setClickable(false);
+
+            mPriceEditText = (EditText) findViewById(R.id.edit_product_price);
+            mPriceEditText.setFocusable(false);
+            mPriceEditText.setClickable(false);
+
+            mQtyEditText = (EditText) findViewById(R.id.quantity_field);
+            mQtyEditText.setFocusable(false);
+            mQtyEditText.setClickable(false);
+
             /*The difference from when we last used a CursorLoader is that instead of taking the
              cursor and putting it into a CursorAdapter, we’ll take all of the items from the cursor
              and use them to populate the EditTextFields. We will use almost the same steps as before,
@@ -107,10 +153,15 @@ public class ProductEditor extends AppCompatActivity  implements LoaderManager.L
     private void saveProduct() {
         // Gets the data repository in write mode
         //SQLiteDatabase db = mDbHelper.getWritableDatabase();
+        //TODO: tratar the update el product una vez ok , so hagamos un update dl producto con la nueva cantidad entrada q esta en new_amount_of_products
 
         //name
         String name = mNameEditText.getText().toString().trim();
         String price_et = mPriceEditText.getText().toString().trim();
+        String qyt_et = mQtyEditText.getText().toString().trim();
+
+
+
         Integer price;
         if (TextUtils.isEmpty(price_et)) {
             price = 0;
@@ -127,6 +178,7 @@ public class ProductEditor extends AppCompatActivity  implements LoaderManager.L
         ContentValues values = new ContentValues();
         values.put(ProductContract.ProductEntry.COLUMN_NAME_NAME, name);
         values.put(ProductContract.ProductEntry.COLUMN_NAME_PRICE, price);
+        values.put(ProductContract.ProductEntry.COLUMN_NAME_QUANTITY, qyt_et);
 
         if(itemUri == null){
             Uri newUri = getContentResolver().insert(ProductContract.ProductEntry.CONTENT_URI, values);
@@ -194,10 +246,12 @@ public class ProductEditor extends AppCompatActivity  implements LoaderManager.L
 
         int nameIdx = cursor.getColumnIndex(ProductContract.ProductEntry.COLUMN_NAME_NAME);
         int priceIdx = cursor.getColumnIndex(ProductContract.ProductEntry.COLUMN_NAME_PRICE);
+        int qtyIdx = cursor.getColumnIndex(ProductContract.ProductEntry.COLUMN_NAME_QUANTITY);
 
         if (cursor.moveToFirst()) {
             mNameEditText.setText(cursor.getString(nameIdx));
             mPriceEditText.setText(String.valueOf(cursor.getInt(priceIdx)));
+            mQtyEditText.setText(String.valueOf(cursor.getInt(qtyIdx)));
         }
     }
 

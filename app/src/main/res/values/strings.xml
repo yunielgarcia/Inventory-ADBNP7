@@ -6,6 +6,7 @@
     <string name="hint_product_price">$</string>
     <string name="btn_add_pict">add product image</string>
     <string name="save_product">save product</string>
+    <string name="shipment_qty">add shipment</string>
     <!-- Title text for the empty view -->
     <string name="empty_view_title_text">Product list es empty</string>
     <!-- Subtitle text for the empty view that prompts the user to add a product -->
@@ -18,4 +19,7 @@
     <string name="product_updated_failed">product update failed</string>
     <string name="li_price">price&#160;</string>
     <string name="li_btn">buy</string>
+    <string name="zero_products">we run out ouf this product.</string>
+    <string name="qty_label">Quantity</string>
+    <string name="shipment_amount">Shipment amount</string>
 </resources>
