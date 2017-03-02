@@ -24,6 +24,11 @@ import com.example.android.productsinventory.data.ProductContract;
 
 import java.io.IOException;
 
+import static com.example.android.productsinventory.R.id.add_shipment_edit;
+import static com.example.android.productsinventory.R.id.sale_amount_et;
+import static com.example.android.productsinventory.R.id.shipment_amount_et;
+import static com.example.android.productsinventory.R.id.shipment_qty_btn;
+
 public class ProductEditor extends AppCompatActivity  implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static int PICK_IMAGE_REQUEST = 1;
@@ -38,11 +43,18 @@ public class ProductEditor extends AppCompatActivity  implements LoaderManager.L
     private EditText mNameEditText;
     private EditText mPriceEditText;
     private EditText mQtyEditText;
+    private LinearLayout add_shipment_edit;
+    private Button register_sale_btn;
+    private EditText shipment_amount_et;
+    private EditText sale_amount_et;
+    private Button shipment_qty_btn;
+    private Button save_btn;
 
     private Uri itemUri;
 
     //New value to be added in case of edit shipment/sale
     String new_amount_of_products = "0";
+    int current_qty_value;
 
 
     @Override
@@ -50,17 +62,26 @@ public class ProductEditor extends AppCompatActivity  implements LoaderManager.L
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_product_editor);
 
-        //Examine the intent that was used to lauch this activity,
-        // in order to figure out if we're creating a new product or editing an existing one.
-        itemUri = getIntent().getData();
-        //check for item uri to see which mode "add pet/edit pet"
-        changeTitle();
-
 
         // Find all relevant views that we will need to read user input from
         mNameEditText = (EditText) findViewById(R.id.product_name);
         mPriceEditText = (EditText) findViewById(R.id.edit_product_price);
         mQtyEditText = (EditText) findViewById(R.id.quantity_field);
+        shipment_qty_btn = (Button) findViewById(R.id.shipment_qty_btn);
+        register_sale_btn = (Button) findViewById(R.id.register_sale_btn);
+        add_shipment_edit = (LinearLayout) findViewById(R.id.add_shipment_edit);
+        final LinearLayout add_sale_ll = (LinearLayout) findViewById(R.id.add_sale_ll);
+        final TextView shipment_cancel_btn =  (TextView) findViewById(R.id.shipment_cancel);
+        final TextView sale_cancel_btn =  (TextView) findViewById(R.id.sale_cancel);
+        final TextView shipment_ok_btn = (TextView) findViewById(R.id.shipment_ok);
+        final TextView sale_ok_btn = (TextView) findViewById(R.id.sale_ok);
+        save_btn = (Button) findViewById(R.id.add_product_btn);
+
+        //Examine the intent that was used to lauch this activity,
+        // in order to figure out if we're creating a new product or editing an existing one.
+        itemUri = getIntent().getData();
+        //check for item uri to see which mode "add pet/edit pet"
+        updateLayout();
 
         //Load the picture onClick
         Button load_img_btn = (Button) findViewById(R.id.buttonLoadPicture);
@@ -77,8 +98,7 @@ public class ProductEditor extends AppCompatActivity  implements LoaderManager.L
             }
         });
 
-        // Setup FAB to open EditorActivity
-        Button save_btn = (Button) findViewById(R.id.add_product_btn);
+        // Save the product
         save_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -87,12 +107,7 @@ public class ProductEditor extends AppCompatActivity  implements LoaderManager.L
             }
         });
 
-        //Add shipment btn
-        final Button shipment_qty_btn = (Button) findViewById(R.id.shipment_qty_btn);
-        final LinearLayout add_shipment_edit = (LinearLayout) findViewById(R.id.add_shipment_edit);
-        final TextView shipment_cancel_btn = (TextView) findViewById(R.id.shipment_cancel);
-        final TextView shipment_ok_btn = (TextView) findViewById(R.id.shipment_ok);
-
+        //onclick for add shipment
         shipment_qty_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -100,7 +115,7 @@ public class ProductEditor extends AppCompatActivity  implements LoaderManager.L
                 add_shipment_edit.setVisibility(View.VISIBLE);
             }
         });
-        //Cancel addition
+        //Cancel addition (shipment)
         shipment_cancel_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -108,25 +123,98 @@ public class ProductEditor extends AppCompatActivity  implements LoaderManager.L
                 shipment_qty_btn.setVisibility(View.VISIBLE);
             }
         });
+
+        //onclick for REGISTER SALE
+        register_sale_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                register_sale_btn.setVisibility(View.GONE);
+                add_sale_ll.setVisibility(View.VISIBLE);
+            }
+        });
+        //Cancel register sale (sale)
+        sale_cancel_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                register_sale_btn.setVisibility(View.VISIBLE);
+                add_sale_ll.setVisibility(View.GONE);
+            }
+        });
+
         //Ok addition
         shipment_ok_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                EditText shipment_amount_et = (EditText) findViewById(R.id.shipment_amount_et);
+                shipment_amount_et = (EditText) findViewById(R.id.shipment_amount_et);
                 new_amount_of_products = shipment_amount_et.getText().toString().trim();
+                int int_new_amount_of_products = Integer.parseInt(new_amount_of_products);
+                calculateNewQty(int_new_amount_of_products);
+                shipment_amount_et.setText("0");
+                add_shipment_edit.setVisibility(View.GONE);
+                shipment_qty_btn.setVisibility(View.VISIBLE);
             }
         });
+
+        //Ok sale
+        sale_ok_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                sale_amount_et = (EditText) findViewById(R.id.sale_amount_et);
+                new_amount_of_products = sale_amount_et.getText().toString().trim();
+                int int_new_sale_of_products = Integer.parseInt(new_amount_of_products);
+                int_new_sale_of_products *= -1;
+                calculateNewQty(int_new_sale_of_products);
+                sale_amount_et.setText("0");
+                add_sale_ll.setVisibility(View.GONE);
+                register_sale_btn.setVisibility(View.VISIBLE);
+            }
+        });
+
     }
 
-    private void changeTitle() {
+    private void calculateNewQty(int new_amount){
+        Integer final_qty = new_amount + current_qty_value;
+
+        //create the new ContentValue obj
+        ContentValues objValues = new ContentValues();
+        String name = mNameEditText.getText().toString().trim();
+        objValues.put(ProductContract.ProductEntry.COLUMN_NAME_NAME, name);
+        String price = mPriceEditText.getText().toString().trim();
+        objValues.put(ProductContract.ProductEntry.COLUMN_NAME_PRICE, price);
+        String new_quantity = final_qty.toString();
+        objValues.put(ProductContract.ProductEntry.COLUMN_NAME_QUANTITY, new_quantity);
+
+        int rowsUpdated = getContentResolver().update(itemUri, objValues, null, null);
+
+        if (rowsUpdated > 0) {
+            Toast.makeText(getBaseContext(), getString(R.string.product_updated),
+                    Toast.LENGTH_SHORT).show();
+            //reset value of shipment and hide view
+
+        } else {
+            Toast.makeText(getBaseContext(), getString(R.string.product_updated_failed),
+                    Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void updateLayout() {
         if (itemUri == null) {
             //hide 'Add shipment' btn
             Button add_shipment_btn = (Button) findViewById(R.id.shipment_qty_btn);
             add_shipment_btn.setVisibility(View.GONE);
+            register_sale_btn.setVisibility(View.GONE);
 
             setTitle(R.string.editor_activity_title_new_product);
 
         } else {
+            //WE ARE EDITING...
+
+            //hide add image btn
+            Button load_pict_btn = (Button) findViewById(R.id.buttonLoadPicture);
+            load_pict_btn.setVisibility(View.GONE);
+            //hide save btn
+            save_btn.setVisibility(View.GONE);
+
 
             setTitle(R.string.editor_activity_title_edit_product);
             //Disable each edit field
@@ -151,9 +239,6 @@ public class ProductEditor extends AppCompatActivity  implements LoaderManager.L
     }
 
     private void saveProduct() {
-        // Gets the data repository in write mode
-        //SQLiteDatabase db = mDbHelper.getWritableDatabase();
-        //TODO: tratar the update el product una vez ok , so hagamos un update dl producto con la nueva cantidad entrada q esta en new_amount_of_products
 
         //name
         String name = mNameEditText.getText().toString().trim();
@@ -193,7 +278,16 @@ public class ProductEditor extends AppCompatActivity  implements LoaderManager.L
                         Toast.LENGTH_SHORT).show();
             }
         }else {
-            //we're updating product
+            //WE ARE UPDATING
+            //we have to take into account whether there's a modification to any field ...
+            //checking for new quantity value
+            if ( !new_amount_of_products.equals("0")){
+                int new_amount_int = Integer.parseInt(new_amount_of_products);
+                int qty_int = Integer.parseInt(qyt_et);
+                int qty_added = new_amount_int + qty_int;
+                //update values obj
+                values.put(ProductContract.ProductEntry.COLUMN_NAME_QUANTITY, qty_added);
+            }
             int rowsUpdated = getContentResolver().update(itemUri, values, null, null);
             if (rowsUpdated > 0) {
                 Toast.makeText(this, getString(R.string.product_updated),
@@ -252,6 +346,8 @@ public class ProductEditor extends AppCompatActivity  implements LoaderManager.L
             mNameEditText.setText(cursor.getString(nameIdx));
             mPriceEditText.setText(String.valueOf(cursor.getInt(priceIdx)));
             mQtyEditText.setText(String.valueOf(cursor.getInt(qtyIdx)));
+            //capture the value in case of updating the quantity
+            current_qty_value = cursor.getInt(qtyIdx);
         }
     }
 
