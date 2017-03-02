@@ -22,4 +22,6 @@
     <string name="zero_products">we run out ouf this product.</string>
     <string name="qty_label">Quantity</string>
     <string name="shipment_amount">Shipment amount</string>
+    <string name="sale_amount">Sale amount</string>
+    <string name="register_sale_btn">Register sale</string>
 </resources>

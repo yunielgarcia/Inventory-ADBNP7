@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2016 The Android Open Source Project
+<?xml version="1.0" encoding="utf-8"?><!-- Copyright (C) 2016 The Android Open Source Project
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
      You may obtain a copy of the License at
@@ -9,8 +8,7 @@
      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
      See the License for the specific language governing permissions and
      limitations under the License.
--->
-<!-- Layout for the editor -->
+--><!-- Layout for the editor -->
 <RelativeLayout
 
     xmlns:android="http://schemas.android.com/apk/res/android"
@@ -24,67 +22,65 @@
     <!-- Overview category -->
     <LinearLayout
         android:id="@+id/prod_name_row"
-        android:layout_alignParentTop="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
         android:orientation="horizontal">
 
         <!-- Label -->
         <TextView
-            android:text="@string/product_name"
-            style="@style/CategoryStyle" />
+            style="@style/CategoryStyle"
+            android:text="@string/product_name" />
 
         <!-- Input fields -->
         <LinearLayout
-            android:layout_height="wrap_content"
             android:layout_width="0dp"
+            android:layout_height="wrap_content"
             android:layout_weight="2"
-            android:paddingLeft="4dp"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingLeft="4dp">
 
             <!-- Name field -->
             <EditText
                 android:id="@+id/product_name"
-                android:hint="@string/hint_product_name"
                 style="@style/EditorFieldStyle"
-                />
+                android:hint="@string/hint_product_name" />
         </LinearLayout>
 
     </LinearLayout>
 
 
-
     <!-- Price field -->
     <LinearLayout
-        android:layout_below="@+id/prod_name_row"
         android:id="@+id/container_measurement"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/prod_name_row"
         android:orientation="horizontal">
 
         <!-- Label -->
         <TextView
-            android:text="@string/price_label"
-            style="@style/CategoryStyle" />
+            style="@style/CategoryStyle"
+            android:text="@string/price_label" />
 
         <!-- Input fields -->
         <RelativeLayout
-            android:layout_height="wrap_content"
             android:layout_width="0dp"
+            android:layout_height="wrap_content"
             android:layout_weight="2"
             android:paddingLeft="4dp">
 
             <!-- price field -->
             <EditText
                 android:id="@+id/edit_product_price"
-                android:inputType="number"
-                style="@style/EditorFieldStyle" />
+                style="@style/EditorFieldStyle"
+                android:inputType="number" />
 
             <!-- Units for weight (kg) -->
             <TextView
                 android:id="@+id/label_weight_units"
-                android:text="@string/hint_product_price"
-                style="@style/EditorUnitsStyle"/>
+                style="@style/EditorUnitsStyle"
+                android:text="@string/hint_product_price" />
 
         </RelativeLayout>
     </LinearLayout>
@@ -92,114 +88,169 @@
     <!-- Price quantity -->
     <LinearLayout
         android:id="@+id/qty_field"
-        android:layout_below="@+id/container_measurement"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/container_measurement"
         android:orientation="horizontal">
 
         <!-- Label -->
         <TextView
-            android:text="@string/qty_label"
-            style="@style/CategoryStyle" />
+            style="@style/CategoryStyle"
+            android:text="@string/qty_label" />
 
         <!-- Input fields -->
         <RelativeLayout
-            android:layout_height="wrap_content"
             android:layout_width="0dp"
+            android:layout_height="wrap_content"
             android:layout_weight="2"
             android:paddingLeft="4dp">
 
             <!-- price field -->
             <EditText
                 android:id="@+id/quantity_field"
-                android:inputType="number"
-                style="@style/EditorFieldStyle" />
+                style="@style/EditorFieldStyle"
+                android:inputType="number" />
 
 
         </RelativeLayout>
     </LinearLayout>
 
     <Button
-        android:layout_below="@+id/qty_field"
         android:id="@+id/buttonLoadPicture"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/qty_field"
         android:layout_gravity="center"
-        android:text="@string/btn_add_pict" >
-    </Button>
+        android:text="@string/btn_add_pict"/>
 
     <ImageView
-        android:layout_below="@+id/buttonLoadPicture"
-        android:padding="10dp"
+        android:id="@+id/imageView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/imageView" />
+        android:layout_below="@+id/buttonLoadPicture"
+        android:padding="10dp" />
 
-    <Button
-        android:layout_alignParentBottom="true"
-        android:id="@+id/add_product_btn"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="@string/save_product" >
-    </Button>
-
-    <Button
-        android:id="@+id/shipment_qty_btn"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="@string/shipment_qty"
-        android:layout_above="@id/add_product_btn">
-    </Button>
-    <!--Add shipment-->
     <LinearLayout
-        android:id="@+id/add_shipment_edit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_above="@id/add_product_btn"
-        android:visibility="gone">
+        android:layout_alignParentBottom="true"
+        android:orientation="vertical">
 
-        <!-- Label -->
-        <TextView
-            android:text="@string/shipment_amount"
-            style="@style/CategoryStyle" />
-
-        <!-- Input fields -->
-        <RelativeLayout
+        <Button
+            android:id="@+id/shipment_qty_btn"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_width="0dp"
-            android:layout_weight="2"
-            android:paddingLeft="4dp">
+            android:layout_gravity="center"
+            android:text="@string/shipment_qty"/>
 
-            <!-- price field -->
-            <EditText
-                android:id="@+id/shipment_amount_et"
-                android:inputType="number"
-                style="@style/EditorFieldStyle"
-                android:text="0"/>
-
-
-        </RelativeLayout>
-
-        <TextView
-            android:id="@+id/shipment_ok"
-            android:layout_width="0dp"
+        <!--Add shipment-->
+        <LinearLayout
+            android:id="@+id/add_shipment_edit"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textColor="@android:color/holo_green_dark"
-            android:text="ok"/>
+            android:orientation="horizontal"
+            android:visibility="gone">
 
-        <TextView
-            android:id="@+id/shipment_cancel"
-            android:layout_width="0dp"
+            <!-- Label -->
+            <TextView
+                style="@style/CategoryStyle"
+                android:text="@string/shipment_amount" />
+
+            <!-- Input fields -->
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:paddingLeft="4dp">
+
+                <!-- price field -->
+                <EditText
+                    android:id="@+id/shipment_amount_et"
+                    style="@style/EditorFieldStyle"
+                    android:inputType="number"
+                    android:text="0" />
+
+
+            </RelativeLayout>
+
+            <TextView
+                android:id="@+id/shipment_ok"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="ok"
+                android:textColor="@android:color/holo_green_dark" />
+
+            <TextView
+                android:id="@+id/shipment_cancel"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="cancel"
+                android:textColor="@android:color/holo_red_dark" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/register_sale_btn"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textColor="@android:color/holo_red_dark"
-            android:text="cancel"/>
+            android:layout_gravity="center"
+            android:text="@string/register_sale_btn"/>
+
+        <!--Add sale-->
+        <LinearLayout
+            android:id="@+id/add_sale_ll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <!-- Label -->
+            <TextView
+                style="@style/CategoryStyle"
+                android:text="@string/sale_amount" />
+
+            <!-- Input fields -->
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:paddingLeft="4dp">
+
+                <!-- price field -->
+                <EditText
+                    android:id="@+id/sale_amount_et"
+                    style="@style/EditorFieldStyle"
+                    android:inputType="number"
+                    android:text="0" />
+
+
+            </RelativeLayout>
+
+            <TextView
+                android:id="@+id/sale_ok"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="ok"
+                android:textColor="@android:color/holo_green_dark" />
+
+            <TextView
+                android:id="@+id/sale_cancel"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="cancel"
+                android:textColor="@android:color/holo_red_dark" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/add_product_btn"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/save_product"/>
     </LinearLayout>
-
 
 
 </RelativeLayout>
