@@ -23,7 +23,7 @@ public class ProductProvider extends ContentProvider {
      */
     public static final String LOG_TAG = ProductProvider.class.getSimpleName();
 
-    //make it globla so all method have access to the productmdhelper instance
+    //make it general so all method have access to the productmdhelper instance
     ProductDbHelper mDbHelper;
 
     /**

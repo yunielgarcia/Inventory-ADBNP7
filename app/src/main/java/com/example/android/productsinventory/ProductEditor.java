@@ -7,11 +7,13 @@ import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -22,9 +24,12 @@ import android.widget.Toast;
 
 import com.example.android.productsinventory.data.ProductContract;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import static android.R.attr.data;
 import static com.example.android.productsinventory.R.id.add_shipment_edit;
+import static com.example.android.productsinventory.R.id.imageView;
 import static com.example.android.productsinventory.R.id.sale_amount_et;
 import static com.example.android.productsinventory.R.id.shipment_amount_et;
 import static com.example.android.productsinventory.R.id.shipment_qty_btn;
@@ -32,12 +37,16 @@ import static com.example.android.productsinventory.R.id.shipment_qty_btn;
 public class ProductEditor extends AppCompatActivity  implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static int PICK_IMAGE_REQUEST = 1;
+    private Bitmap imgBitmap = null;
+    private ImageView imageView;
+
     private static final int EXISTING_PRODUCT_LOADER = 1;
     private static final String[] PROJECTION = {
             ProductContract.ProductEntry._ID,
             ProductContract.ProductEntry.COLUMN_NAME_NAME,
             ProductContract.ProductEntry.COLUMN_NAME_PRICE,
             ProductContract.ProductEntry.COLUMN_NAME_QUANTITY,
+            ProductContract.ProductEntry.COLUMN_NAME_IMG
     };
 
     private EditText mNameEditText;
@@ -76,6 +85,7 @@ public class ProductEditor extends AppCompatActivity  implements LoaderManager.L
         final TextView shipment_ok_btn = (TextView) findViewById(R.id.shipment_ok);
         final TextView sale_ok_btn = (TextView) findViewById(R.id.sale_ok);
         save_btn = (Button) findViewById(R.id.add_product_btn);
+        imageView = (ImageView) findViewById(R.id.imageView);
 
         //Examine the intent that was used to lauch this activity,
         // in order to figure out if we're creating a new product or editing an existing one.
@@ -245,6 +255,13 @@ public class ProductEditor extends AppCompatActivity  implements LoaderManager.L
         String price_et = mPriceEditText.getText().toString().trim();
         String qyt_et = mQtyEditText.getText().toString().trim();
 
+        byte[] dataImg;
+
+        if (imgBitmap != null) {
+            dataImg = getBitmapAsByteArray(imgBitmap);
+        }else {
+            dataImg = null;
+        }
 
 
         Integer price;
@@ -254,16 +271,18 @@ public class ProductEditor extends AppCompatActivity  implements LoaderManager.L
             price = Integer.parseInt(price_et);
         }
         //if everything is empty let's just end the activity without inserting
-        if (TextUtils.isEmpty(name) && TextUtils.isEmpty(price_et) && itemUri == null) {
+        if (TextUtils.isEmpty(name) && TextUtils.isEmpty(price_et) && TextUtils.isEmpty(qyt_et) && imgBitmap == null && itemUri == null) {
             finish();
             return;
         }
+
 
         // Create a new map of values, where column names are the keys
         ContentValues values = new ContentValues();
         values.put(ProductContract.ProductEntry.COLUMN_NAME_NAME, name);
         values.put(ProductContract.ProductEntry.COLUMN_NAME_PRICE, price);
         values.put(ProductContract.ProductEntry.COLUMN_NAME_QUANTITY, qyt_et);
+        values.put(ProductContract.ProductEntry.COLUMN_NAME_IMG, dataImg);
 
         if(itemUri == null){
             Uri newUri = getContentResolver().insert(ProductContract.ProductEntry.CONTENT_URI, values);
@@ -298,9 +317,13 @@ public class ProductEditor extends AppCompatActivity  implements LoaderManager.L
             }
         }
 
-
-
         //Log.i("ROWS_INNSERTED", newUri.toString());
+    }
+
+    private byte[] getBitmapAsByteArray(Bitmap bitmap) {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 0, outputStream);
+        return outputStream.toByteArray();
     }
 
     @Override
@@ -312,11 +335,10 @@ public class ProductEditor extends AppCompatActivity  implements LoaderManager.L
             Uri uri = data.getData();
 
             try {
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
-                // Log.d(TAG, String.valueOf(bitmap));
+                imgBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+                //Log.d("ImageBitmap", String.valueOf(imgBitmap));
 
-                ImageView imageView = (ImageView) findViewById(R.id.imageView);
-                imageView.setImageBitmap(bitmap);
+                imageView.setImageBitmap(imgBitmap);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -341,6 +363,7 @@ public class ProductEditor extends AppCompatActivity  implements LoaderManager.L
         int nameIdx = cursor.getColumnIndex(ProductContract.ProductEntry.COLUMN_NAME_NAME);
         int priceIdx = cursor.getColumnIndex(ProductContract.ProductEntry.COLUMN_NAME_PRICE);
         int qtyIdx = cursor.getColumnIndex(ProductContract.ProductEntry.COLUMN_NAME_QUANTITY);
+        int imgIdx = cursor.getColumnIndex(ProductContract.ProductEntry.COLUMN_NAME_IMG);
 
         if (cursor.moveToFirst()) {
             mNameEditText.setText(cursor.getString(nameIdx));
@@ -348,7 +371,14 @@ public class ProductEditor extends AppCompatActivity  implements LoaderManager.L
             mQtyEditText.setText(String.valueOf(cursor.getInt(qtyIdx)));
             //capture the value in case of updating the quantity
             current_qty_value = cursor.getInt(qtyIdx);
+            //retrive image
+            byte[] imgByte = cursor.getBlob(imgIdx);
+            imageView.setImageBitmap(getImgBitmap(imgByte));
         }
+    }
+
+    private Bitmap getImgBitmap(byte[] image){
+        return BitmapFactory.decodeByteArray(image, 0, image.length);
     }
 
     @Override
