@@ -242,6 +242,13 @@
             </LinearLayout>
 
             <Button
+                android:id="@+id/order_supplier"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/order_supplier"/>
+
+            <Button
                 android:id="@+id/add_product_btn"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"

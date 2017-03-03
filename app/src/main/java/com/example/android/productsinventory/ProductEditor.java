@@ -1,8 +1,10 @@
 package com.example.android.productsinventory;
 
+import android.app.AlertDialog;
 import android.app.LoaderManager;
 import android.content.ContentValues;
 import android.content.CursorLoader;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
@@ -10,10 +12,13 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.MediaStore;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -28,14 +33,16 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import static android.R.attr.data;
+import static android.R.attr.order;
 import static com.example.android.productsinventory.R.id.add_shipment_edit;
 import static com.example.android.productsinventory.R.id.imageView;
 import static com.example.android.productsinventory.R.id.sale_amount_et;
 import static com.example.android.productsinventory.R.id.shipment_amount_et;
 import static com.example.android.productsinventory.R.id.shipment_qty_btn;
 
-public class ProductEditor extends AppCompatActivity  implements LoaderManager.LoaderCallbacks<Cursor> {
+public class ProductEditor extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
+    private static String PRODUCT_SUPPLIER_EMAIL = "supplierEmail@email.com";
     private static int PICK_IMAGE_REQUEST = 1;
     private Bitmap imgBitmap = null;
     private ImageView imageView;
@@ -80,8 +87,8 @@ public class ProductEditor extends AppCompatActivity  implements LoaderManager.L
         register_sale_btn = (Button) findViewById(R.id.register_sale_btn);
         add_shipment_edit = (LinearLayout) findViewById(R.id.add_shipment_edit);
         final LinearLayout add_sale_ll = (LinearLayout) findViewById(R.id.add_sale_ll);
-        final TextView shipment_cancel_btn =  (TextView) findViewById(R.id.shipment_cancel);
-        final TextView sale_cancel_btn =  (TextView) findViewById(R.id.sale_cancel);
+        final TextView shipment_cancel_btn = (TextView) findViewById(R.id.shipment_cancel);
+        final TextView sale_cancel_btn = (TextView) findViewById(R.id.sale_cancel);
         final TextView shipment_ok_btn = (TextView) findViewById(R.id.shipment_ok);
         final TextView sale_ok_btn = (TextView) findViewById(R.id.sale_ok);
         save_btn = (Button) findViewById(R.id.add_product_btn);
@@ -113,7 +120,6 @@ public class ProductEditor extends AppCompatActivity  implements LoaderManager.L
             @Override
             public void onClick(View view) {
                 saveProduct();
-                finish();
             }
         });
 
@@ -180,9 +186,26 @@ public class ProductEditor extends AppCompatActivity  implements LoaderManager.L
             }
         });
 
+        //order more from supplier
+        Button order = (Button) findViewById(R.id.order_supplier);
+        order.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                if (itemUri != null) {
+                    Intent intent = new Intent(Intent.ACTION_SENDTO);
+                    intent.setData(Uri.parse("mailto:")); // only email apps should handle this
+                    intent.putExtra(Intent.EXTRA_EMAIL, new String[]{PRODUCT_SUPPLIER_EMAIL});
+                    intent.putExtra(Intent.EXTRA_SUBJECT, "MORE ITEMS NEEDED");
+                    intent.putExtra(Intent.EXTRA_TEXT, "Product name: " + mNameEditText.getText().toString());
+                    if (intent.resolveActivity(getPackageManager()) != null) {
+                        startActivity(intent);
+                    }
+                }
+            }
+        });
+
     }
 
-    private void calculateNewQty(int new_amount){
+    private void calculateNewQty(int new_amount) {
         Integer final_qty = new_amount + current_qty_value;
 
         //create the new ContentValue obj
@@ -209,12 +232,21 @@ public class ProductEditor extends AppCompatActivity  implements LoaderManager.L
 
     private void updateLayout() {
         if (itemUri == null) {
+            //WE ARE INSERTING...
+
             //hide 'Add shipment' btn
             Button add_shipment_btn = (Button) findViewById(R.id.shipment_qty_btn);
             add_shipment_btn.setVisibility(View.GONE);
             register_sale_btn.setVisibility(View.GONE);
+            //hide order from supplier
+            Button supplier_btn = (Button) findViewById(R.id.order_supplier);
+            supplier_btn.setVisibility(View.GONE);
+
 
             setTitle(R.string.editor_activity_title_new_product);
+
+            // (It doesn't make sense to delete a product that hasn't been created yet.)
+            invalidateOptionsMenu();
 
         } else {
             //WE ARE EDITING...
@@ -254,25 +286,17 @@ public class ProductEditor extends AppCompatActivity  implements LoaderManager.L
         String name = mNameEditText.getText().toString().trim();
         String price_et = mPriceEditText.getText().toString().trim();
         String qyt_et = mQtyEditText.getText().toString().trim();
-
         byte[] dataImg;
-
         if (imgBitmap != null) {
             dataImg = getBitmapAsByteArray(imgBitmap);
-        }else {
+        } else {
             dataImg = null;
         }
 
-
-        Integer price;
-        if (TextUtils.isEmpty(price_et)) {
-            price = 0;
-        } else {
-            price = Integer.parseInt(price_et);
-        }
         //if everything is empty let's just end the activity without inserting
-        if (TextUtils.isEmpty(name) && TextUtils.isEmpty(price_et) && TextUtils.isEmpty(qyt_et) && imgBitmap == null && itemUri == null) {
-            finish();
+        if (TextUtils.isEmpty(name) || TextUtils.isEmpty(price_et) || TextUtils.isEmpty(qyt_et) || imgBitmap == null) {
+            Toast.makeText(this, getString(R.string.empty_fields),
+                    Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -280,11 +304,11 @@ public class ProductEditor extends AppCompatActivity  implements LoaderManager.L
         // Create a new map of values, where column names are the keys
         ContentValues values = new ContentValues();
         values.put(ProductContract.ProductEntry.COLUMN_NAME_NAME, name);
-        values.put(ProductContract.ProductEntry.COLUMN_NAME_PRICE, price);
+        values.put(ProductContract.ProductEntry.COLUMN_NAME_PRICE, price_et);
         values.put(ProductContract.ProductEntry.COLUMN_NAME_QUANTITY, qyt_et);
         values.put(ProductContract.ProductEntry.COLUMN_NAME_IMG, dataImg);
 
-        if(itemUri == null){
+        if (itemUri == null) {
             Uri newUri = getContentResolver().insert(ProductContract.ProductEntry.CONTENT_URI, values);
             // Show a toast message depending on whether or not the insertion was successful
             if (newUri == null) {
@@ -295,12 +319,13 @@ public class ProductEditor extends AppCompatActivity  implements LoaderManager.L
                 // Otherwise, the insertion was successful and we can display a toast.
                 Toast.makeText(this, getString(R.string.editor_insert_prod_successful),
                         Toast.LENGTH_SHORT).show();
+                finish();
             }
-        }else {
+        } else {
             //WE ARE UPDATING
             //we have to take into account whether there's a modification to any field ...
             //checking for new quantity value
-            if ( !new_amount_of_products.equals("0")){
+            if (!new_amount_of_products.equals("0")) {
                 int new_amount_int = Integer.parseInt(new_amount_of_products);
                 int qty_int = Integer.parseInt(qyt_et);
                 int qty_added = new_amount_int + qty_int;
@@ -377,7 +402,7 @@ public class ProductEditor extends AppCompatActivity  implements LoaderManager.L
         }
     }
 
-    private Bitmap getImgBitmap(byte[] image){
+    private Bitmap getImgBitmap(byte[] image) {
         return BitmapFactory.decodeByteArray(image, 0, image.length);
     }
 
@@ -387,4 +412,78 @@ public class ProductEditor extends AppCompatActivity  implements LoaderManager.L
         mNameEditText.setText("");
         mPriceEditText.setText(String.valueOf(0));
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu options from the res/menu/menu_editor.xml file.
+        // This adds menu items to the app bar.
+        getMenuInflater().inflate(R.menu.menu_editor, menu);
+        return true;
+    }
+
+    //Then (after invalidateOptionsMenu), in onPrepareOptionsMenu will get called and you can modify the Menu object
+    // by hiding the delete menu option if it’s a new pet.
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        // If this is a new product, hide the "Delete" menu item.
+        if (itemUri == null) {
+            MenuItem menuItem = menu.findItem(R.id.action_delete);
+            menuItem.setVisible(false);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // User clicked on a menu option in the app bar overflow menu
+        switch (item.getItemId()) {
+            // Respond to a click on the "Delete" menu option
+            case R.id.action_delete:
+                showDeleteConfirmationDialog();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void showDeleteConfirmationDialog() {
+        // Create an AlertDialog.Builder and set the message, and click listeners
+        // for the postivie and negative buttons on the dialog.
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(R.string.delete_dialog_msg);
+        builder.setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User clicked the "Delete" button, so delete the pet.
+                deleteProduct();
+            }
+        });
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User clicked the "Cancel" button, so dismiss the dialog
+                // and continue editing the pet.
+                if (dialog != null) {
+                    dialog.dismiss();
+                }
+            }
+        });
+
+        // Create and show the AlertDialog
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+    private void deleteProduct() {
+        int rowsDeleted = getContentResolver().delete(itemUri, null, null);
+        if (rowsDeleted > 0) {
+            finish();
+            // If the new content URI is null, then there was an error with insertion.
+            Toast.makeText(this, getString(R.string.editor_delete_product_successful),
+                    Toast.LENGTH_SHORT).show();
+        } else {
+            // Otherwise, the insertion was successful and we can display a toast.
+            Toast.makeText(this, getString(R.string.editor_delete_product_failed),
+                    Toast.LENGTH_SHORT).show();
+        }
+    }
+
 }
